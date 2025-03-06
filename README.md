@@ -208,21 +208,15 @@ frontend/
 │── babel.config.json
 ```
 
-### 2. Instalacja zależności
-```bash
-npm init -y
-npm install react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
-npm install --save-dev webpack webpack-cli webpack-dev-server babel-loader @babel/core @babel/preset-env @babel/preset-react html-webpack-plugin style-loader css-loader
-```
 
-### 3. Konfiguracja Babel (`babel.config.json`)
+### 2. Konfiguracja Babel (`babel.config.json`)
 ```json
 {
   "presets": ["@babel/preset-env", "@babel/preset-react"]
 }
 ```
 
-### 4. Konfiguracja Webpack (`webpack.config.js`)
+### 3. Konfiguracja Webpack (`webpack.config.js`)
 ```js
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -255,7 +249,58 @@ module.exports = {
 };
 ```
 
-### 5. Uruchomienie Reacta
+### 4. Pliki źródłowe (src/)
+1. src/index.js
+```js
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./components/App";
+import "../static/css/index.css";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+```
+
+2. src/components/App.js
+```js
+import React from "react";
+import { Button } from "@mui/material";
+
+const App = () => {
+  return (
+    <div>
+      <h1>Witaj w React!</h1>
+      <Button variant="contained" color="primary">Kliknij mnie</Button>
+    </div>
+  );
+};
+
+export default App;
+```
+
+3. src/index.html
+```html
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React App</title>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
+```
+
+
+### 5. Instalacja zależności
+```bash
+npm init -y
+npm install react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
+npm install --save-dev webpack webpack-cli webpack-dev-server babel-loader @babel/core @babel/preset-env @babel/preset-react html-webpack-plugin style-loader css-loader
+```
+
+### 6. Uruchomienie Reacta
 ```bash
 npm start
 ```
