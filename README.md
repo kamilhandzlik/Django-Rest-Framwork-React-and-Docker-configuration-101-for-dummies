@@ -81,6 +81,11 @@ from decouple import config
     ```bash
     python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
     ```
+    lub użyj tej komendy wykorzystującej django extensions pamiętaj tylko żeby usunąć wszystkie znaki '#' z klucza
+    ```bash
+    python manage.py generate_secret_key
+    ```
+
 4. Skopiuj nowy klucz do `.env`.
 
 ### 5. Konfiguracja Django REST Framework
