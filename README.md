@@ -1,90 +1,95 @@
-# Django REST Framework, React and Docker Configuration 101 for Dummies
+# Django REST Framework, React i Docker - Konfiguracja 101 dla Początkujących
 
 ## Wstęp
 
-Cześć!  
-Poniżej znajdziesz krótki poradnik, jak założyć projekt w Django i skonfigurować w nim Django REST Framework oraz React.
+Cześć!
+Ten poradnik pomoże Ci skonfigurować Django REST Framework oraz React w jednym projekcie.
 
-**WAŻNE!!!**  
-Ten setup działa na dzień 4.03.2025. W zależności od tego, kiedy korzystasz z tego poradnika, niektóre jego elementy mogą być przestarzałe.
+**Uwaga:** Ten setup działa na dzień **4.03.2025**. W przyszłości niektóre elementy mogą wymagać aktualizacji.
 
 ---
 
-## I. Django
+## I. Konfiguracja Django i Django REST Framework
 
-### 1. Zakładanie wirtualnego środowiska
+### 1. Tworzenie wirtualnego środowiska
 
 Aby rozpocząć, zainstaluj `virtualenv` i utwórz nowe wirtualne środowisko:
 
-1. Zainstaluj `virtualenv`:
-    ```bash
-    pip install virtualenv
-    ```
-2. Utwórz nowe wirtualne środowisko:
-    ```bash
-    python -m virtualenv nazwa_środowiska  # najlepiej 'env' lub 'venv'
-    ```
-3. Aktywuj wirtualne środowisko:
-   - **Dla Windowsa (nie zapomnij o kropce na początku!):**
-     ```bash
-     . venv/Scripts/activate
-     ```
-   - **Dla Linuxa:**
-     ```bash
-     source venv/bin/activate
-     ```
-
-### 2. Wykonanie odpowiednich instalacji
-
-Można skorzystać z pliku `requirements.txt`, umieszczonego w tym repozytorium. Jeśli go nie masz, stwórz go w tym samym katalogu co pliki `venv` i `README` i dodaj poniższe linie:
-
-django python-decouple djangorestframework django-extensions
-
-
-Alternatywnie, zainstaluj rozszerzenia ręcznie za pomocą poleceń w terminalu:
-
 ```bash
-pip install django
-pip install python-decouple
-pip install django-extensions
-pip install djangorestframework
-3. Konfiguracja pliku settings.py
-W pliku settings.py dodaj następujące aplikacje do listy INSTALLED_APPS:
+pip install virtualenv
+python -m virtualenv venv  # Nazwa środowiska najlepiej 'venv'
+```
 
+Aktywacja środowiska:
+- **Windows:**
+  ```bash
+  venv\Scripts\activate
+  ```
+- **Linux/macOS:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+### 2. Instalacja wymaganych pakietów
+
+Możesz skorzystać z pliku `requirements.txt`. Jeśli go nie masz, utwórz i dodaj:
+
+```
+django
+python-decouple
+djangorestframework
+django-extensions
+```
+
+Aby zainstalować zależności:
+```bash
+pip install -r requirements.txt
+```
+
+Alternatywnie, instalacja ręczna:
+```bash
+pip install django python-decouple djangorestframework django-extensions
+```
+
+### 3. Konfiguracja `settings.py`
+Dodaj wymagane aplikacje do `INSTALLED_APPS`:
+
+```python
 INSTALLED_APPS = [
     ...,
     "django_extensions",
     "rest_framework",
 ]
-Dalej, dodaj import w settings.py:
+```
 
+Dodaj import w `settings.py`:
+```python
 from decouple import config
-4. Zabezpieczanie SECRET_KEY
-W tym samym katalogu, co plik manage.py, stwórz plik .env.
+```
 
-Zapisz w nim:
+### 4. Zabezpieczenie `SECRET_KEY`
 
-SECRET_KEY="wpisz swój klucz"
-W settings.py zamień SECRET_KEY na poniższą linię:
+1. W katalogu projektu utwórz plik `.env` i dodaj:
+    ```
+    SECRET_KEY="twoj-tajny-klucz"
+    ```
+2. W `settings.py` zamień klucz na:
+    ```python
+    SECRET_KEY = config("SECRET_KEY")
+    ```
+3. Aby wygenerować nowy klucz:
+    ```bash
+    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+    ```
+4. Skopiuj nowy klucz do `.env`.
 
-SECRET_KEY = config("SECRET_KEY")
-Następnie, przejdź do terminala i wygeneruj nowy SECRET_KEY:
-
-python manage.py generate_secret_key
-Wygenerowany klucz dodaj do pliku .env:
-
-SECRET_KEY=nowy-wygenerowany-klucz
-5. Konfiguracja Django REST Framework (DRF) w settings.py (opcjonalne, ale zalecane)
-Na końcu pliku settings.py dodaj poniższą konfigurację:
-
-
+### 5. Konfiguracja Django REST Framework
+W `settings.py` dodaj:
+```python
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",  # Wyświetlanie UI z Django REST Framework
-    ],
-    "DEFAULT_PARSER_CLASSES": [
-        "rest_framework.parsers.JSONParser",
+        "rest_framework.renderers.BrowsableAPIRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
@@ -94,53 +99,40 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
 }
-6. Tworzenie aplikacji dla API
-W terminalu wpisz:
+```
 
+### 6. Tworzenie aplikacji `api`
+```bash
 python manage.py startapp api
-Następnie, dodaj aplikację do INSTALLED_APPS w settings.py:
-
-
+```
+Dodaj do `INSTALLED_APPS`:
+```python
 INSTALLED_APPS = [
     ...,
-    "django_extensions",
-    "rest_framework",
-    "api.apps.ApiConfig",  #  Jest to w ścieżka do klasy która powstaje w pliku apps nowo powstałej aplikacji, która zawsze będzie się nazywać NazwaAplikacjiConfig 
+    "api.apps.ApiConfig",
 ]
+```
 
-7. Tworzenie pierwszego modelu
-Załóżmy, że tworzysz API do zarządzania książkami. W pliku models.py aplikacji api dodaj model:
-
-
+### 7. Tworzenie modelu `Book`
+W `api/models.py`:
+```python
 from django.db import models
 
 class Book(models.Model):
     title = models.CharField(max_length=255, blank=True)
     author = models.CharField(max_length=255, blank=True)
     description = models.CharField(max_length=1000, blank=True)
-    publish_date = models.DateField(blank=True)
-
-    def __str__(self):
-        return f"{self.title or 'Brak tytułu'} - {self.author or 'Brak autora'} - {self.publish_date or 'Brak daty'}"
-Nie zapomnij zrobić migracji:
-
-
+    publish_date = models.DateField(blank=True, null=True)
+```
+Wykonaj migracje:
+```bash
 python manage.py makemigrations api
 python manage.py migrate
-Zachowanie blank=True w DateField
-Jeśli napiszesz:
+```
 
-publish_date = models.DateField(blank=True)
-Django pozwoli na zapis pustego pola w formularzu (ModelForm), ale baza danych wciąż wymaga wartości, więc próbując zapisać model bez daty, dostaniesz błąd IntegrityError.
-
-Aby pole było opcjonalne w bazie danych, musisz dodać:
-
-publish_date = models.DateField(blank=True, null=True)
-blank=True – Django nie będzie wymagać wartości w formularzach.
-null=True – W bazie danych pole może być NULL.
-8. Tworzenie serializera
-W pliku serializers.py w aplikacji api dodaj serializer:
-
+### 8. Tworzenie serializera
+W `api/serializers.py`:
+```python
 from rest_framework import serializers
 from .models import Book
 
@@ -148,16 +140,11 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = '__all__'
-Możesz także ręcznie wypisać pola, które chcesz, aby były serializowane:
+```
 
-class BookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = ['title', 'author', 'publish_date']
-9. Tworzenie widoków API
-W pliku views.py w aplikacji api dodaj widoki dla API:
-
-
+### 9. Tworzenie widoków API
+W `api/views.py`:
+```python
 from rest_framework import generics
 from .models import Book
 from .serializers import BookSerializer
@@ -169,9 +156,11 @@ class BookListCreateView(generics.ListCreateAPIView):
 class BookRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-10. Dodanie URL-i dla API
-W pliku api/urls.py stwórz ścieżki:
+```
 
+### 10. Konfiguracja URL-i
+W `api/urls.py`:
+```python
 from django.urls import path
 from .views import BookListCreateView, BookRetrieveUpdateDestroyView
 
@@ -179,21 +168,95 @@ urlpatterns = [
     path('books/', BookListCreateView.as_view(), name='book-list'),
     path('books/<int:pk>/', BookRetrieveUpdateDestroyView.as_view(), name='book-detail'),
 ]
-Teraz podłącz je do głównego pliku urls.py projektu:
-
+```
+W `urls.py` projektu:
+```python
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # Dodanie ścieżek API
+    path('api/', include('api.urls')),
 ]
-11. Uruchomienie serwera i testowanie API
-Uruchom serwer Django:
+```
 
+### 11. Uruchomienie serwera Django
+```bash
 python manage.py runserver
-Teraz możesz sprawdzić swoje API w przeglądarce lub za pomocą narzędzi takich jak curl lub Postman:
+```
+Sprawdź API w przeglądarce lub Postmanie:
+- Lista książek: [http://127.0.0.1:8000/api/books/](http://127.0.0.1:8000/api/books/)
+- Szczegóły książki: [http://127.0.0.1:8000/api/books/1/](http://127.0.0.1:8000/api/books/1/)
 
-Lista książek: http://127.0.0.1:8000/api/books/
-Detale książki: http://127.0.0.1:8000/api/books/1/
+---
+
+## II. Konfiguracja React + Webpack
+
+### 1. Struktura katalogów
+```
+frontend/
+│── src/
+│   ├── components/
+│   │   ├── App.js
+│   ├── index.js
+│── static/css/
+│   ├── index.css
+│── templates/frontend/
+│   ├── index.html
+│── package.json
+│── webpack.config.js
+│── babel.config.json
+```
+
+### 2. Instalacja zależności
+```bash
+npm init -y
+npm install react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
+npm install --save-dev webpack webpack-cli webpack-dev-server babel-loader @babel/core @babel/preset-env @babel/preset-react html-webpack-plugin style-loader css-loader
+```
+
+### 3. Konfiguracja Babel (`babel.config.json`)
+```json
+{
+  "presets": ["@babel/preset-env", "@babel/preset-react"]
+}
+```
+
+### 4. Konfiguracja Webpack (`webpack.config.js`)
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "static/frontend"),
+    filename: "main.js",
+  },
+  mode: "development",
+  devServer: {
+    static: "./static/frontend",
+    port: 3000,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: "babel-loader",
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+  plugins: [new HtmlWebpackPlugin({ template: "./src/index.html" })],
+};
+```
+
+### 5. Uruchomienie Reacta
+```bash
+npm start
+```
 
