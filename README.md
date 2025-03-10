@@ -21,6 +21,7 @@ python -m virtualenv venv  # Nazwa środowiska najlepiej 'venv'
 ```
 
 Aktywacja środowiska:
+
 - **Windows:**
   ```bash
   venv\Scripts\activate
@@ -42,16 +43,19 @@ django-extensions
 ```
 
 Aby zainstalować zależności:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 Alternatywnie, instalacja ręczna:
+
 ```bash
 pip install django python-decouple djangorestframework django-extensions
 ```
 
 ### 3. Konfiguracja `settings.py`
+
 Dodaj wymagane aplikacje do `INSTALLED_APPS`:
 
 ```python
@@ -63,6 +67,7 @@ INSTALLED_APPS = [
 ```
 
 Dodaj import w `settings.py`:
+
 ```python
 from decouple import config
 ```
@@ -70,26 +75,31 @@ from decouple import config
 ### 4. Zabezpieczenie `SECRET_KEY`
 
 1. W katalogu projektu utwórz plik `.env` i dodaj:
-    ```
-    SECRET_KEY="twoj-tajny-klucz"
-    ```
+   ```
+   SECRET_KEY="twoj-tajny-klucz"
+   ```
 2. W `settings.py` zamień klucz na:
-    ```python
-    SECRET_KEY = config("SECRET_KEY")
-    ```
+   ```python
+   SECRET_KEY = config("SECRET_KEY")
+   ```
 3. Aby wygenerować nowy klucz:
-    ```bash
-    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
-    ```
-    lub użyj tej komendy wykorzystującej django extensions pamiętaj tylko żeby usunąć wszystkie znaki '#' z klucza
-    ```bash
-    python manage.py generate_secret_key
-    ```
+
+   ```bash
+   python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+   ```
+
+   lub użyj tej komendy wykorzystującej django extensions pamiętaj tylko żeby usunąć wszystkie znaki '#' z klucza
+
+   ```bash
+   python manage.py generate_secret_key
+   ```
 
 4. Skopiuj nowy klucz do `.env`.
 
 ### 5. Konfiguracja Django REST Framework
+
 W `settings.py` dodaj:
+
 ```python
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -107,10 +117,13 @@ REST_FRAMEWORK = {
 ```
 
 ### 6. Tworzenie aplikacji `api`
+
 ```bash
 python manage.py startapp api
 ```
+
 Dodaj do `INSTALLED_APPS`:
+
 ```python
 INSTALLED_APPS = [
     ...,
@@ -119,7 +132,9 @@ INSTALLED_APPS = [
 ```
 
 ### 7. Tworzenie modelu `Book`
+
 W `api/models.py`:
+
 ```python
 from django.db import models
 
@@ -129,14 +144,18 @@ class Book(models.Model):
     description = models.CharField(max_length=1000, blank=True)
     publish_date = models.DateField(blank=True, null=True)
 ```
+
 Wykonaj migracje:
+
 ```bash
 python manage.py makemigrations api
 python manage.py migrate
 ```
 
 ### 8. Tworzenie serializera
+
 W `api/serializers.py`:
+
 ```python
 from rest_framework import serializers
 from .models import Book
@@ -148,7 +167,9 @@ class BookSerializer(serializers.ModelSerializer):
 ```
 
 ### 9. Tworzenie widoków API
+
 W `api/views.py`:
+
 ```python
 from rest_framework import generics
 from .models import Book
@@ -164,7 +185,9 @@ class BookRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 ```
 
 ### 10. Konfiguracja URL-i
+
 W `api/urls.py`:
+
 ```python
 from django.urls import path
 from .views import BookListCreateView, BookRetrieveUpdateDestroyView
@@ -174,7 +197,9 @@ urlpatterns = [
     path('books/<int:pk>/', BookRetrieveUpdateDestroyView.as_view(), name='book-detail'),
 ]
 ```
+
 W `urls.py` projektu:
+
 ```python
 from django.contrib import admin
 from django.urls import path, include
@@ -186,10 +211,13 @@ urlpatterns = [
 ```
 
 ### 11. Uruchomienie serwera Django
+
 ```bash
 python manage.py runserver
 ```
+
 Sprawdź API w przeglądarce lub Postmanie:
+
 - Lista książek: [http://127.0.0.1:8000/api/books/](http://127.0.0.1:8000/api/books/)
 - Szczegóły książki: [http://127.0.0.1:8000/api/books/1/](http://127.0.0.1:8000/api/books/1/)
 
@@ -198,6 +226,7 @@ Sprawdź API w przeglądarce lub Postmanie:
 ## II. Konfiguracja React + Webpack
 
 ### 1. Struktura katalogów
+
 ```
 frontend/
 │── src/
@@ -213,8 +242,8 @@ frontend/
 │── babel.config.json
 ```
 
-
 ### 2. Konfiguracja Babel (`babel.config.json`)
+
 ```json
 {
   "presets": ["@babel/preset-env", "@babel/preset-react"]
@@ -222,6 +251,7 @@ frontend/
 ```
 
 ### 3. Konfiguracja Webpack (`webpack.config.js`)
+
 ```js
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -254,8 +284,49 @@ module.exports = {
 };
 ```
 
-### 4. Pliki źródłowe (src/)
+### 4. Konfiguracja (`package.json`)
+
+```js
+{
+    "name": "frontend",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "webpack serve --mode development",
+        "build": "webpack --mode production",
+        "start": "npm run dev"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@mui/icons-material": "^6.4.7",
+        "@mui/material": "^6.4.7",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.26.9",
+        "@babel/preset-env": "^7.26.9",
+        "@babel/preset-react": "^7.26.3",
+        "babel-loader": "^10.0.0",
+        "css-loader": "^7.1.2",
+        "html-webpack-plugin": "^5.6.3",
+        "style-loader": "^4.0.0",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-dev-server": "^5.2.0"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}
+```
+
+### 5. Pliki źródłowe (src/)
+
 1. src/index.js
+
 ```js
 import React from "react";
 import ReactDOM from "react-dom";
@@ -266,6 +337,7 @@ ReactDOM.render(<App />, document.getElementById("root"));
 ```
 
 2. src/components/App.js
+
 ```js
 import React from "react";
 import { Button } from "@mui/material";
@@ -274,7 +346,9 @@ const App = () => {
   return (
     <div>
       <h1>Witaj w React!</h1>
-      <Button variant="contained" color="primary">Kliknij mnie</Button>
+      <Button variant="contained" color="primary">
+        Kliknij mnie
+      </Button>
     </div>
   );
 };
@@ -283,30 +357,31 @@ export default App;
 ```
 
 3. src/index.html
+
 ```html
 <!DOCTYPE html>
 <html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>React App</title>
-</head>
-<body>
+  </head>
+  <body>
     <div id="root"></div>
-</body>
+  </body>
 </html>
 ```
 
+### 6. Instalacja zależności
 
-### 5. Instalacja zależności
 ```bash
 npm init -y
 npm install react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
 npm install --save-dev webpack webpack-cli webpack-dev-server babel-loader @babel/core @babel/preset-env @babel/preset-react html-webpack-plugin style-loader css-loader
 ```
 
-### 6. Uruchomienie Reacta
+### 7. Uruchomienie Reacta
+
 ```bash
 npm start
 ```
-
